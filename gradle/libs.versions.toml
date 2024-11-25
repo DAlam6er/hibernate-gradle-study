@@ -1,0 +1,24 @@
+[versions]
+hibernate = "5.6.15.Final"
+hibernate-types = "3.9.0"
+jackson = "2.18.1"
+reload4j = "2.0.16"
+postgresql = "42.7.4"
+lombok = "1.18.36"
+junit-platform = "5.11.3"
+
+[libraries]
+hibernate-core = { module = "org.hibernate:hibernate-core", version.ref = "hibernate" }
+hibernate-utils = { module = "io.hypersistence:hypersistence-utils-hibernate-55", version.ref = "hibernate-types" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-jaxb-annotations = { module = "com.fasterxml.jackson.module:jackson-module-jaxb-annotations", version.ref = "jackson" }
+reload4j = { module = "org.slf4j:slf4j-reload4j", version.ref = "reload4j" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-platform" }
+jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-platform" }
+jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-platform" }
+
+[bundles]
+
+[plugins]
