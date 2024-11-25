@@ -1,14 +1,14 @@
 package com.dmdev.entity;
 
-import com.dmdev.converter.BirthdayConverter;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Embeddable;
+import com.dmdev.converter.AgeConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embeddable;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -17,14 +17,13 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 @Embeddable
-public class PersonalInfo implements Serializable
-{
+public class PersonalInfo implements Serializable {
     @Serial
     private static final long serialVersionUID = 9154080960028288028L;
     private String firstname;
     private String lastname;
 
-    @Convert(converter = BirthdayConverter.class)
+    @Convert(converter = AgeConverter.class)
     @Column(name = "birth_date")
-    private Birthday birthDate;
+    private AgeType birthDate;
 }

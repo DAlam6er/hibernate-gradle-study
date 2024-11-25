@@ -1,7 +1,6 @@
 package com.dmdev.entity;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import jakarta.persistence.*;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +8,13 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +23,7 @@ import org.hibernate.annotations.TypeDef;
 @Entity
 @Table(name = "users", schema = "public")
 @TypeDef(name = "dmdev", typeClass = JsonBinaryType.class)
-public class User
-{
+public class User {
 
     // вариант с автогенерируемым первичным ключом
     /*
@@ -50,7 +55,7 @@ public class User
     @Column(unique = true)
     private String username;
 
-//    @Type(type = "com.vladmihalcea.hibernate.type.json.JsonBinaryType")
+    //    @Type(type = "io.hypersistence.utils.hibernate.type.json.JsonBinaryType")
 //    @Type(type = "jsonb")
     @Type(type = "dmdev")
     private String info;
