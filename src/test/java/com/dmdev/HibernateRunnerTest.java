@@ -19,37 +19,34 @@ import java.util.Arrays;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
-class HibernateRunnerTest
-{
+class HibernateRunnerTest {
     private final static String DB_URL = "jdbc:postgresql://localhost:5432/postgres";
     private final static String DB_USER_NAME = "postgres";
     private final static String DB_USER_PASS = "postgres";
 
     User user = User.builder()
-        .username("petr@gmail.com")
-        .personalInfo(PersonalInfo.builder()
-            .firstname("Petr")
-            .lastname("Petrov")
-            .birthDate(new Birthday(LocalDate.of(1999, 1, 31)))
-            .build())
-        .role(Role.USER)
-        .build();
+            .username("petr@gmail.com")
+            .personalInfo(PersonalInfo.builder()
+                    .firstname("Petr")
+                    .lastname("Petrov")
+                    .birthDate(new Birthday(LocalDate.of(1999, 1, 31)))
+                    .build())
+            .role(Role.USER)
+            .build();
 
     @Test
     void checkGetReflectionApi() throws SQLException, NoSuchMethodException,
-        InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException
-    {
+            InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         var id = "ivan@gmail.com";
         var sql = """
-            SELECT username, firstname, lastname, birth_date, role, info
-            FROM users
-            WHERE username = ?
-            """;
+                SELECT username, firstname, lastname, birth_date, role, info
+                FROM users
+                WHERE username = ?
+                """;
 
         try (var connection = DriverManager.getConnection(
-            DB_URL, DB_USER_NAME, DB_USER_PASS);
-             var preparedStatement = connection.prepareStatement(sql))
-        {
+                DB_URL, DB_USER_NAME, DB_USER_PASS);
+             var preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, id);
 
             var resultSet = preparedStatement.executeQuery();
@@ -79,48 +76,46 @@ class HibernateRunnerTest
     }
 
     @Test
-    void checkSaveReflectionApi() throws SQLException, IllegalAccessException
-    {
+    void checkSaveReflectionApi() throws SQLException, IllegalAccessException {
         // через Reflection API получим класс этой сущности
         // чтобы показать, как Session формирует SQL-запрос
         // %s — признак динамической составляющей
         var sql = """
-            insert
-            into
-                %s
-                (%s)
-            values
-                (%s)
-            """;
+                insert
+                into
+                    %s
+                    (%s)
+                values
+                    (%s)
+                """;
 
         var tableName = ofNullable(
-            user.getClass().getAnnotation(Table.class))
-            .map(tableAnnotation -> tableAnnotation.schema() + "." + tableAnnotation.name())
-            .orElse(user.getClass().getName());
+                user.getClass().getAnnotation(Table.class))
+                .map(tableAnnotation -> tableAnnotation.schema() + "." + tableAnnotation.name())
+                .orElse(user.getClass().getName());
 
         // Внимание! getDeclaredFields() не гарантирует порядок полей
         // поэтому в идеале следовало бы отсортировать их по названию
         Field[] declaredFields = user.getClass().getDeclaredFields();
 
         var columnNames = Arrays.stream(declaredFields)
-            .map(field -> ofNullable(field.getAnnotation(Column.class))
-                .map(Column::name)
-                .orElse(field.getName()))
-            .collect(joining(", "));
+                .map(field -> ofNullable(field.getAnnotation(Column.class))
+                        .map(Column::name)
+                        .orElse(field.getName()))
+                .collect(joining(", "));
         // в реальном коде ситуация будет несколько сложнее, т.к. мы можем передавать
         // PhysicalNamingStrategy и в этом случае мы получаем у него имя field, как оно должно быть
 
         var columnValues = Arrays.stream(declaredFields)
-            .map(field -> "?")
-            .collect(joining(", "));
+                .map(field -> "?")
+                .collect(joining(", "));
 
         var formattedSql = sql.formatted(tableName, columnNames, columnValues);
         System.out.println(formattedSql);
 
         try (var connection = DriverManager.getConnection(
-            DB_URL, DB_USER_NAME, DB_USER_PASS);
-             var preparedStatement = connection.prepareStatement(formattedSql))
-        {
+                DB_URL, DB_USER_NAME, DB_USER_PASS);
+             var preparedStatement = connection.prepareStatement(formattedSql)) {
             for (int i = 0; i < declaredFields.length; i++) {
                 declaredFields[i].setAccessible(true);
                 // field.get(user) — получить значение поля, представленного этим Field, для указанного объекта (user)
@@ -131,8 +126,8 @@ class HibernateRunnerTest
                 var object = declaredFields[i].get(user);
                 if (object instanceof Birthday birthday) {
                     preparedStatement.setDate(
-                        i + 1,
-                        new BirthdayConverter().convertToDatabaseColumn(birthday));
+                            i + 1,
+                            new BirthdayConverter().convertToDatabaseColumn(birthday));
                 } else if (object instanceof Role role) {
                     preparedStatement.setString(i + 1, role.name());
                 } else {
