@@ -1,4 +1,4 @@
-package com.dmdev.type;
+package com.dmdev.v5.type;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -7,8 +7,13 @@ import org.hibernate.usertype.UserType;
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
-
+/**
+ * Вместо переопределения всех этих методов, подключим библиотеку hibernate-types
+ * и воспользуемся классом JsonBinaryType, где эта работа уже проделана:
+ * Type -> SingleColumnType --> AbstractSingleColumnStandardBasicType --> AbstractHibernateType --> JsonBinaryType
+ */
 public class JsonType implements UserType {
     @Override
     public int[] sqlTypes() {
@@ -16,7 +21,7 @@ public class JsonType implements UserType {
     }
 
     @Override
-    public Class<?> returnedClass() {
+    public Class returnedClass() {
         return null;
     }
 
@@ -31,14 +36,13 @@ public class JsonType implements UserType {
     }
 
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException {
-        // из rs получаем что-то, что будет являться нашим JSON
+    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
         return null;
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException {
-        // дан PreparedStatement и JSON, который необходимо установить в PreparedStatement
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+
     }
 
     @Override

@@ -1,60 +1,77 @@
 package com.dmdev;
 
-import com.dmdev.entity.Birthday;
+import com.dmdev.entity.AgeType;
 import com.dmdev.entity.PersonalInfo;
 import com.dmdev.entity.Role;
 import com.dmdev.entity.User;
 import com.dmdev.util.HibernateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
 import java.time.LocalDate;
 
 import static java.util.Optional.ofNullable;
 
 @Slf4j
-public class HibernateRunner
-{
+public class HibernateRunner {
 //     в %c в appender log4j.xml будет подставлено имя класса
 //     вместо того, чтобы писать эту строку из класса в класс, используют аннотацию lombok @Slf4j
 //    private static final Logger log = LoggerFactory.getLogger(HibernateRunner.class);
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
+        demoSessionFactoryCongirure();
 //        demoCrud();
 //        demoEntityLifeCycle();
-        demoCompositeKey();
+//        demoCompositeKey();
     }
 
-    private static void demoCompositeKey()
-    {
+    private static void demoSessionFactoryCongirure() {
+//        BlockingDeque<Connection> pool = null;
+//        Connection conn = pool.take();
+//        SessionFactory
+
+//        Connection conn = DriverManager
+//                .getConnection("db.url", "db.username", "db.password");
+//        Session
+
+        Configuration configuration = new Configuration();
+        configuration.configure(); // default path is "./hibernate.cfg.xml"
+        try (SessionFactory sessionFactory = configuration.buildSessionFactory();
+             Session session = sessionFactory.openSession()) {
+            System.out.println("OK");
+        }
+    }
+
+    private static void demoCompositeKey() {
         var user = User.builder()
-            .username("petr@gmail.com")
-            .personalInfo(PersonalInfo.builder()
-                .lastname("Petrov")
-                .firstname("Petr")
-                .birthDate(new Birthday(LocalDate.of(2000, 1, 2)))
-                .build())
-            .build();
+                .username("petr@gmail.com")
+                .personalInfo(PersonalInfo.builder()
+                        .lastname("Petrov")
+                        .firstname("Petr")
+                        .birthDate(new AgeType(LocalDate.of(2000, 1, 2)))
+                        .build())
+                .build();
 
         log.info("User entity is in transient state, object: {}", user);
 
+        // SessionFactory - аналог ConnectionPool в JDBC
         try (var sessionFactory = HibernateUtil.buildSessionFactory()) {
-            try (Session session = sessionFactory.openSession())
-            {
+            // Session - аналог Connection в JDBC
+            try (Session session = sessionFactory.openSession()) {
                 session.beginTransaction();
                 session.saveOrUpdate(user);
                 log.trace("User entity is in persistent state: {}, session {}", user, session);
 
                 session.getTransaction().commit();
             }
-            try (Session session = sessionFactory.openSession())
-            {
+            try (Session session = sessionFactory.openSession()) {
                 PersonalInfo key = PersonalInfo.builder()
-                    .lastname("Petrov")
-                    .firstname("Petr")
-                    .birthDate(new Birthday(LocalDate.of(2000, 1, 2)))
-                    .build();
+                        .lastname("Petrov")
+                        .firstname("Petr")
+                        .birthDate(new AgeType(LocalDate.of(2000, 1, 2)))
+                        .build();
 
                 var user2 = session.get(User.class, key);
                 System.out.println(user2);
@@ -62,27 +79,25 @@ public class HibernateRunner
         }
     }
 
-    public static void demoCrud()
-    {
+    public static void demoCrud() {
         try (var sessionFactory = HibernateUtil.buildSessionFactory();
-             var session = sessionFactory.openSession())
-        {
+             var session = sessionFactory.openSession()) {
             session.beginTransaction();
             var user = User.builder()
-                .username("ivan@gmail.com")
-                .personalInfo(PersonalInfo.builder()
-                    .firstname("Ivan")
-                    .lastname("Ivanov")
-                    .birthDate(new Birthday(LocalDate.of(2000, 1, 19)))
-                    .build())
-                .role(Role.ADMIN)
-                .info("""
-                    {
-                        "name": "Ivan",
-                        "id": 25
-                    }
-                    """)
-                .build();
+                    .username("ivan@gmail.com")
+                    .personalInfo(PersonalInfo.builder()
+                            .firstname("Ivan")
+                            .lastname("Ivanov")
+                            .birthDate(new AgeType(LocalDate.of(2000, 1, 19)))
+                            .build())
+                    .role(Role.ADMIN)
+                    .info("""
+                            {
+                                "name": "Ivan",
+                                "id": 25
+                            }
+                            """)
+                    .build();
 
 //            session.save(user); // deprecated method since Hibernate 6.0
 //            session.update(user);
@@ -97,17 +112,16 @@ public class HibernateRunner
         }
     }
 
-    public static void demoEntityLifeCycle()
-    {
+    public static void demoEntityLifeCycle() {
         // Сущность в Transient по отношению к session1 и session2
         var user = User.builder()
-            .username("petr@gmail.com")
-            .personalInfo(PersonalInfo.builder()
-                .lastname("Petrov")
-                .firstname("Petr")
-                .birthDate(new Birthday(LocalDate.of(2000, 1, 2)))
-                .build())
-            .build();
+                .username("petr@gmail.com")
+                .personalInfo(PersonalInfo.builder()
+                        .lastname("Petrov")
+                        .firstname("Petr")
+                        .birthDate(new AgeType(LocalDate.of(2000, 1, 2)))
+                        .build())
+                .build();
 
         // противоречит правилам хорошего тона
 //        log.info("User entity is in transient state, object: " + user);
